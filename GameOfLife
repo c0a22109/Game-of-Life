@@ -1,0 +1,76 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import copy
+from matplotlib import rc 
+
+def p_func(k, n):
+    if k == -1:
+        return n-1
+    elif k == n:
+        return 0
+    else:
+        return k    
+
+def ma_on(x, y, n):
+    total = -1 #自身のセルが含まれるため
+    for i in range(-1, 2):
+        for j in range(-1, 2):
+            if now_field[p_func(x+i, n), p_func(y+j, n)] == 1:
+                total += 1
+                
+    if (total == 2 or total == 3):
+        return 1 #1(オン)を返す
+    else:
+        return 0 #0(オフ)を返す
+        
+def ma_off(x, y, n):
+    total = 0
+    for i in range(-1, 2):
+        for j in range(-1, 2):    
+            if now_field[p_func(x+i, n), p_func(y+j, n)] == 1:
+                total += 1
+                
+    if total == 3:
+        return 1 #1(オン)を返す
+    else:
+        return 0 #0(オフ)を返す
+
+n = 100
+sedai = 10
+p = 0.3
+now_field = []
+next_field = np.zeros((n, n))
+ma_field = []
+ims = []
+fig = plt.figure()
+
+init_field = np.random.choice([0, 1], [n, n], p = [1-p, p])
+
+now_field = copy.copy(init_field)
+
+for k in range(sedai):
+    x = []
+    y = []
+    for i in range(n):
+        for j in range(n):
+            if now_field[i][j] == 1:
+                next_field[i][j] = ma_on(i, j, n)
+            else:
+                next_field[i][j] = ma_off(i, j, n)  
+                
+    now_field = copy.copy(next_field)
+
+    for l in range(n):
+        for m in range(n):
+            if now_field[l][m] == 1:
+                x.append(l)
+                y.append(m)
+    im = plt.scatter(x, y, c = "b", s = 5)
+    ims.append([im])
+    
+plt.close()
+#アニメーションの速度調整
+ani = animation.ArtistAnimation(fig, ims, interval = 200, repeat_delay = 1000)
+rc('animation', html = 'jshtml')
+ani
